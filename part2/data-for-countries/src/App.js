@@ -1,18 +1,54 @@
 import React, { useEffect, useState } from "react"
 import axios from 'axios'
 
+const WeatherDisplay = ({ weather }) => {
+  if (weather === null) {
+    return <></>
+  }
+
+  const getDirection = (deg) => {
+    if (deg > 348.75 && deg <= 11.25) return 'N'
+    if (deg > 11.25 && deg <= 33.75) return 'NNE'
+    if (deg > 33.75 && deg <= 56.25) return 'NE'
+    if (deg > 56.25 && deg <= 78.75) return 'ENE'
+    if (deg > 78.75 && deg <= 101.25) return 'E'
+    if (deg > 101.25 && deg <= 123.75) return 'ESE'
+    if (deg > 123.75 && deg <= 146.25) return 'SE'
+    if (deg > 146.25 && deg <= 168.75) return 'SSE'
+    if (deg > 168.75 && deg <= 191.25) return 'S'
+    if (deg > 191.25 && deg <= 213.75) return 'SSW'
+    if (deg > 213.75 && deg <= 236.25) return 'SW'
+    if (deg > 236.25 && deg <= 258.75) return 'WSW'
+    if (deg > 258.75 && deg <= 281.25) return 'W'
+    if (deg > 281.25 && deg <= 326.25) return 'NW'
+    if (deg > 326.25 && deg <= 348.75) return 'NNW'
+  }
+
+  return (
+    <div>
+      <h2>Weather in {weather.name}</h2>
+      <div><b>temperature: </b>{weather.main.temp} Celcius</div>
+      <img
+        src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+        alt="weather icon"
+      />
+      <div><b>wind: </b>{weather.wind.speed} mph direction {getDirection(weather.wind.deg)}</div>
+    </div >
+  )
+}
+
 const CountryDisplay = ({ country }) => {
   const hook = () => {
     const api_key = process.env.REACT_APP_API_KEY
     axios
-      .get(`http://api.openweathermap.org/data/2.5/weather?id=524901&appid=${api_key}`)
+      .get(`http://api.openweathermap.org/data/2.5/weather?q=${country.capital}&units=metric&appid=${api_key}`)
       .then(response => {
         console.log(response.data)
         setCapitalWeather(response.data)
       })
   }
-  useEffect(hook, [])
-  const [capitalWeather, setCapitalWeather] = useState({})
+  useEffect(hook, [country])
+  const [capitalWeather, setCapitalWeather] = useState(null)
 
   return (
     <div>
@@ -30,8 +66,9 @@ const CountryDisplay = ({ country }) => {
           )}
       </ul>
       <img src={country.flags.png}
-        alt={`flag of ${country.name.common}`} />
-      <h2>Weather in {country.capital}</h2>
+        alt={`flag of ${country.name.common}`}
+      />
+      <WeatherDisplay weather={capitalWeather} />
     </div>
   )
 }
