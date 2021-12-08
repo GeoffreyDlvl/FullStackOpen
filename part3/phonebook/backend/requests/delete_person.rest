@@ -1,0 +1,5 @@
+DELETE http://localhost:3001/api/persons/2
+
+###
+
+DELETE https://agile-sierra-17886.herokuapp.com/api/persons/2

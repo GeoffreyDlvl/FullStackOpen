@@ -1,0 +1,48 @@
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "number": "0123456789"
+}
+
+###
+POST https://agile-sierra-17886.herokuapp.com/api/persons
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "number": "0123456789"
+}
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "number": "0123456789"
+}
+
+###
+POST https://agile-sierra-17886.herokuapp.com/api/persons
+Content-Type: application/json
+
+{
+    "number": "0123456789"
+}
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "John Doe"
+}
+
+###
+POST https://agile-sierra-17886.herokuapp.com/api/persons
+Content-Type: application/json
+
+{
+    "name": "John Doe"
+}
