@@ -46,3 +46,22 @@ Content-Type: application/json
 {
     "name": "John Doe"
 }
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "Ta",
+    "number": "0123456789"
+}
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "Someone",
+    "number": "0123"
+}
+
