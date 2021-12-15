@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest --verbose",
+    "test": "jest --verbose --runInBand",
     "lint": "eslint ."
   },
   "author": "Geoffrey Delval",
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "eslint": "^8.4.1",
-    "jest": "^27.4.5"
+    "jest": "^27.4.5",
+    "supertest": "^6.1.6"
   }
 }
