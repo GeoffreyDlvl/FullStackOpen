@@ -6,3 +6,20 @@ Content-Type: application/json
   "name": "Geoffrey",
   "password": "sekret"
 }
+###
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+  "username": "too-short-pwd",
+  "name": "Too Short Pwd",
+  "password": "ab"
+}
+###
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+  "name": "No Username",
+  "password": "sekret"
+}
