@@ -3,13 +3,12 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const helper = require('./test_helper')
-const Blog = require('../models/blog')
 
 const initialBlogs = helper.blogs
 
 beforeEach(async () => {
-  await Blog.deleteMany({})
-  await Blog.insertMany(initialBlogs)
+  await helper.cleanDatabases()
+  await helper.populateDatabases()
 })
 
 describe('when there is initially some blogs saved', () => {
@@ -40,9 +39,11 @@ describe('addition of a new blog post', () => {
       url: 'http://some-url.com',
       likes: 2
     }
+    const authToken = await helper.getAuthenticationToken(api)
 
     await api
       .post('/api/blogs')
+      .set('Authorization', 'bearer ' + authToken)
       .send(newBlogPost)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -66,10 +67,12 @@ describe('addition of a new blog post', () => {
       author: 'Some author',
       url: 'http://some-url.com',
     }
+    const authToken = await helper.getAuthenticationToken(api)
 
     const response =
       await api
         .post('/api/blogs')
+        .set('Authorization', 'bearer ' + authToken)
         .send(newBlogPost)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -83,11 +86,30 @@ describe('addition of a new blog post', () => {
       author: 'Some author',
       likes: 2
     }
+    const authToken = await helper.getAuthenticationToken(api)
 
     await api
       .post('/api/blogs')
+      .set('Authorization', 'bearer ' + authToken)
       .send(newBlogPost)
       .expect(400)
+  })
+
+  test('fails with statuscode 401 when authentication token is incorrect', async () => {
+    const newBlogPost = {
+      title: 'A new blog post',
+      author: 'Some author',
+      url: 'http://some-url.com',
+      likes: 2
+    }
+    const authToken = 'invalid_token'
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', 'bearer ' + authToken)
+      .send(newBlogPost)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
   })
 })
 

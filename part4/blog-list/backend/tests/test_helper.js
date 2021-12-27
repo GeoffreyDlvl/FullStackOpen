@@ -1,5 +1,6 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const bcrypt = require('bcrypt')
 
 const blogs = [
   {
@@ -76,9 +77,37 @@ const nonExistingId = async () => {
   return blog._id
 }
 
+const cleanDatabases = async () => {
+  await Blog.deleteMany({})
+  await User.deleteMany({})
+}
+
+const populateDatabases = async () => {
+  await Blog.insertMany(blogs)
+
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  await user.save()
+}
+
+const getAuthenticationToken = async (api) => {
+  const correctUser = {
+    username: 'root',
+    password: 'sekret'
+  }
+  const response = await api
+    .post('/api/login')
+    .send(correctUser)
+
+  return response.body.token
+}
+
 module.exports = {
   blogs,
   blogsInDb,
   usersInDb,
   nonExistingId,
+  cleanDatabases,
+  populateDatabases,
+  getAuthenticationToken
 }

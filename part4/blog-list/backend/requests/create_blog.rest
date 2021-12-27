@@ -1,8 +1,9 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im9sZF9ib2kiLCJpZCI6IjYxYzg4ZGJlOGM3YWUwMzkxMjA1MWE3ZSIsImlhdCI6MTY0MDYxNzY4MH0.CItgPcpqhF0SWIMrziixp4xslbnZ_QJXJ0f6sXnrHVY
 
 {
-  "title": "My blog title",
+  "title": "My blog title with token",
   "author": "John Doe",
   "url": "http://my-url.com",
   "likes": 2
