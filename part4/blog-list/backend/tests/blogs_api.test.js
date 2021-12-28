@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
+const user = require('../models/user')
 const api = supertest(app)
 const helper = require('./test_helper')
 
@@ -40,7 +41,6 @@ describe('addition of a new blog post', () => {
       likes: 2
     }
     const authToken = await helper.getAuthenticationToken(api)
-
     await api
       .post('/api/blogs')
       .set('Authorization', 'bearer ' + authToken)
@@ -114,17 +114,51 @@ describe('addition of a new blog post', () => {
 })
 
 describe('delete a blog post', () => {
-  test('succeeds with statuscode 204 when id is valid', async () => {
+  test('succeeds when id is valid and token belongs to user who added the blog post', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
+    expect(blogToDelete.user.toString()).toBe('61cb36115ff9842fe83b1a2a') // root user id
+
+    const authToken = await helper.getAuthenticationToken(api) // root user token
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', 'bearer ' + authToken)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
     expect(blogsAtEnd).not.toContain(blogToDelete)
+  })
+
+  test('fails when id is invalid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+
+    const invalid_id = 'invalid_id'
+    const authToken = await helper.getAuthenticationToken(api)
+    await api
+      .delete(`/api/blogs/${invalid_id}`)
+      .set('Authorization', 'bearer ' + authToken)
+      .expect(400)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length)
+  })
+
+  test('fails when token does not belong to blog post user', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    expect(blogToDelete.user.toString()).toBe('61cb36115ff9842fe83b1a2a') // root user id
+
+    const authToken = await helper.getAuthenticationToken(api, 'test_user', 'pa$$w0rd')
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', 'bearer ' + authToken)
+      .expect(401)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length)
   })
 })
 

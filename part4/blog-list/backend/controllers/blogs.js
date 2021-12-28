@@ -4,6 +4,11 @@ const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const config = require('../utils/config')
 
+const findUserFrom = async (token) => {
+  const decodedToken = jwt.verify(token, config.SECRET)
+  return await User.findById(decodedToken.id)
+}
+
 blogsRouter.get('/', async (request, response) => {
   const blogs =
     await Blog
@@ -16,9 +21,7 @@ blogsRouter.post('/', async (request, response, next) => {
   const body = request.body
 
   try {
-    const decodedToken = jwt.verify(request.token, config.SECRET)
-
-    const user = await User.findById(decodedToken.id)
+    const user = await findUserFrom(request.token)
 
     const blog = new Blog({
       title: body.title,
@@ -27,6 +30,7 @@ blogsRouter.post('/', async (request, response, next) => {
       likes: body.likes || 0,
       user: user._id
     })
+
     const result = await blog.save()
     user.blogs = user.blogs.concat(blog)
     await user.save()
@@ -36,9 +40,18 @@ blogsRouter.post('/', async (request, response, next) => {
   }
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
-  await Blog.findByIdAndRemove(request.params.id)
-  response.status(204).end()
+blogsRouter.delete('/:id', async (request, response, next) => {
+  try {
+    const user = await findUserFrom(request.token)
+    const blog = await Blog.findById(request.params.id)
+    if (blog.user.toString() !== user.id.toString()) {
+      return response.status(401).json({ error: 'token does not match with blog post creator' })
+    }
+    await blog.remove()
+    response.status(204).end()
+  } catch (exception) {
+    next(exception)
+  }
 })
 
 blogsRouter.put('/:id', async (request, response, next) => {
