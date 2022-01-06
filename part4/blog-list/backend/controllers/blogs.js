@@ -1,13 +1,6 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
-const User = require('../models/user')
-const jwt = require('jsonwebtoken')
-const config = require('../utils/config')
-
-const findUserFrom = async (token) => {
-  const decodedToken = jwt.verify(token, config.SECRET)
-  return await User.findById(decodedToken.id)
-}
+const middleware = require('../utils/middleware')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs =
@@ -17,11 +10,11 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs)
 })
 
-blogsRouter.post('/', async (request, response, next) => {
+blogsRouter.post('/', middleware.userExtractor, async (request, response, next) => {
   const body = request.body
 
   try {
-    const user = await findUserFrom(request.token)
+    const user = request.user
 
     const blog = new Blog({
       title: body.title,
@@ -40,9 +33,9 @@ blogsRouter.post('/', async (request, response, next) => {
   }
 })
 
-blogsRouter.delete('/:id', async (request, response, next) => {
+blogsRouter.delete('/:id', middleware.userExtractor, async (request, response, next) => {
   try {
-    const user = await findUserFrom(request.token)
+    const user = request.user
     const blog = await Blog.findById(request.params.id)
     if (blog.user.toString() !== user.id.toString()) {
       return response.status(401).json({ error: 'token does not match with blog post creator' })
